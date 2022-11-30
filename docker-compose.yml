@@ -1,4 +1,9 @@
 version: "3.4"
+
+networks:
+  seednet:
+    driver: bridge
+
 services:
   vpn:
     container_name: vpn
@@ -13,13 +18,13 @@ services:
       - label:disable
     ports:
       - 8112:8112 # port for deluge web UI to be reachable from local network
-    command: '-f "" -r 192.168.1.0/24' # enable firewall and route local network traffic
+    command: "-r 192.168.1.0/24" # route local network traffic
 
   deluge:
     container_name: deluge
     image: linuxserver/deluge:latest
     restart: unless-stopped
-    network_mode: service:vpn # run on the vpn network
+    network_mode: service:vpn
     environment:
       - PUID=${PUID} # default user id, defined in .env
       - PGID=${PGID} # default group id, defined in .env
@@ -27,6 +32,18 @@ services:
     volumes:
       - ${ROOT}/downloads:/downloads # downloads folder
       - ${ROOT}/config/deluge:/config # config files
+
+  flaresolverr:
+    image: ghcr.io/flaresolverr/flaresolverr:latest
+    container_name: flaresolverr
+    environment:
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - LOG_HTML=${LOG_HTML:-false}
+      - CAPTCHA_SOLVER=${CAPTCHA_SOLVER:-none}
+      - TZ=${TZ}
+    ports:
+      - "${PORT:-8191}:8191"
+    restart: unless-stopped
 
   jackett:
     container_name: jackett
@@ -95,7 +112,7 @@ services:
     volumes:
       - ${ROOT}/config/plex/db:/config # plex database
       - ${ROOT}/config/plex/transcode:/transcode # temp transcoded files
-      - ${ROOT}/complete:/data # media library
+      - ${ROOT}/downloads/complete:/data # media library
 
   bazarr:
     container_name: bazarr
@@ -113,3 +130,18 @@ services:
       - ${ROOT}/complete/tv:/tv # tv shows folder
     ports:
       - 6767:6767
+
+  organizr:
+    image: organizr/organizr
+    container_name: organizr
+    environment:
+      - PUID=${PUID} # default user id, defined in .env
+      - PGID=${PGID} # default group id, defined in .env
+      - TZ=${TZ} # timezone, defined in .env
+      - fpm=true #true or false | using true will provide better performance
+      - branch=v2-master # v2-master or #v 2-develop
+    volumes:
+      - ${ROOT}/config/organizr:/config
+    ports:
+      - 8980:80
+    restart: unless-stopped
