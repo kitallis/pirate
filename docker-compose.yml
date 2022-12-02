@@ -1,9 +1,5 @@
 version: "3.4"
 
-networks:
-  seednet:
-    driver: bridge
-
 services:
   vpn:
     container_name: vpn
