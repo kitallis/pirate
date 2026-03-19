@@ -4,5 +4,6 @@ Refer to the original for instructions: https://github.com/sebgl/htpc-download-b
 
 Additionally, adds:
 
-- Organizr
+- Homepage
 - FlareSolverr
+- Replaces Deluge with qBittorrent
