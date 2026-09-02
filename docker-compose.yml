@@ -136,6 +136,6 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
-      - HOMEPAGE_ALLOWED_HOSTS=192.168.0.197:2222,ghar.casa:2222
+      - HOMEPAGE_ALLOWED_HOSTS=192.168.0.197:2222,${DOMAIN}:2222
     group_add:
       - "122"

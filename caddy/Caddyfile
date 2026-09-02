@@ -1,4 +1,5 @@
-*.ghar.casa {
+# DOMAIN is provided via the caddy container's environment (see .env).
+*.{$DOMAIN} {
 	tls {
 		dns cloudflare {env.CF_API_TOKEN}
 	}
@@ -7,25 +8,25 @@
 		@nottailnet not client_ip 100.64.0.0/10 fd7a:115c:a1e0::/48
 		respond @nottailnet "tailnet only" 403
 
-		@sonarr host sonarr.ghar.casa
+		@sonarr host sonarr.{$DOMAIN}
 		reverse_proxy @sonarr 127.0.0.1:8989
 
-		@radarr host radarr.ghar.casa
+		@radarr host radarr.{$DOMAIN}
 		reverse_proxy @radarr 127.0.0.1:7878
 
-		@prowlarr host prowlarr.ghar.casa
+		@prowlarr host prowlarr.{$DOMAIN}
 		reverse_proxy @prowlarr 127.0.0.1:9696
 
-		@nzbget host nzbget.ghar.casa
+		@nzbget host nzbget.{$DOMAIN}
 		reverse_proxy @nzbget 127.0.0.1:6789
 
-		@bazarr host bazarr.ghar.casa
+		@bazarr host bazarr.{$DOMAIN}
 		reverse_proxy @bazarr 127.0.0.1:6767
 
-		@torrent host torrent.ghar.casa
+		@torrent host torrent.{$DOMAIN}
 		reverse_proxy @torrent 127.0.0.1:8113
 
-		@ops host ops.ghar.casa
+		@ops host ops.{$DOMAIN}
 		reverse_proxy @ops 127.0.0.1:9000
 
 		respond "no such service" 404
@@ -34,7 +35,7 @@
 
 # Public homepage: HTTPS on :2222 (router already forwards 2222). No tailnet
 # guard -> stays public, now with a real cert. Plain http on :2222 not served.
-https://ghar.casa:2222 {
+https://{$DOMAIN}:2222 {
 	tls {
 		dns cloudflare {env.CF_API_TOKEN}
 	}

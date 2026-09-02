@@ -30,6 +30,7 @@ services:
       - tailscale
     environment:
       - CF_API_TOKEN=${CF_API_TOKEN}
+      - DOMAIN=${DOMAIN}
     volumes:
       - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
