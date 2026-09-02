@@ -111,6 +111,7 @@ services:
     container_name: bazarr
     image: linuxserver/bazarr
     restart: unless-stopped
+    network_mode: host
     environment:
       - PUID=${PUID} # default user id, defined in .env
       - PGID=${PGID} # default group id, defined in .env
@@ -118,17 +119,14 @@ services:
       - UMASK_SET=022 #optional
     volumes:
       - ${ROOT}/config/bazarr:/config # config files
-      - ${ROOT}/complete/movies:/movies # movies folder
-      - ${ROOT}/complete/tv:/tv # tv shows folder
-    ports:
-      - 6767:6767
+      - ${ROOT}/downloads/:/downloads
 
   homepage:
     image: ghcr.io/gethomepage/homepage:latest
     container_name: homepage
     restart: unless-stopped
     ports:
-      - 2222:3000
+      - "127.0.0.1:3000:3000"
     env_file:
       - /media/storage/homemedia/config/homepage/.env
     volumes:

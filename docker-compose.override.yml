@@ -1,0 +1,52 @@
+# Additive layer: docker-compose auto-merges this with docker-compose.yml.
+# Nothing in your existing file is touched. To back out: delete this file
+# and re-run `docker-compose up -d --remove-orphans`.
+
+services:
+  tailscale:
+    image: tailscale/tailscale:latest
+    container_name: tailscale
+    hostname: ghar
+    network_mode: host
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    volumes:
+      - tailscale_state:/var/lib/tailscale
+      - /dev/net/tun:/dev/net/tun
+    environment:
+      - TS_STATE_DIR=/var/lib/tailscale
+      - TS_USERSPACE=false
+      - TS_EXTRA_ARGS=--accept-dns=false
+    restart: unless-stopped
+
+  caddy:
+    build: ./caddy
+    image: pirate_caddy
+    container_name: caddy
+    restart: unless-stopped
+    network_mode: host
+    depends_on:
+      - tailscale
+    environment:
+      - CF_API_TOKEN=${CF_API_TOKEN}
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:9000:9000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+
+volumes:
+  tailscale_state:
+  caddy_data:
+  caddy_config:
+  portainer_data:
