@@ -3,6 +3,16 @@
 # and re-run `docker-compose up -d --remove-orphans`.
 
 services:
+  # 2026-11-06: eMudhra intermediate CA compromise. flaresolverr's image still
+  # trusts emSign ECC Root CA - G3; use the host's patched Debian bundle instead.
+  flaresolverr:
+    volumes:
+      # whole Debian trust store: OpenSSL also reads the hashed per-cert dir
+      - /etc/ssl/certs:/etc/ssl/certs:ro
+      - /usr/share/ca-certificates:/usr/share/ca-certificates:ro
+      # Chromium ignores the OS store (built-in Chrome Root Store); distrust via managed policy
+      - ./flaresolverr/emudhra-distrust.json:/etc/chromium/policies/managed/emudhra-distrust.json:ro
+
   tailscale:
     image: tailscale/tailscale:latest
     container_name: tailscale
