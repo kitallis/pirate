@@ -56,6 +56,25 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - portainer_data:/data
 
+  # On boot the Docker daemon (not compose) restarts containers, ignores
+  # depends_on, and won't retry qbittorrent if it starts before vpn exists
+  # ("cannot join network of a non running container"). Keep nudging it.
+  # Note: also undoes a deliberate `docker stop qbittorrent` within 30s;
+  # stop this container first when you want qbit down.
+  qbit-watchdog:
+    image: docker:cli
+    container_name: qbit-watchdog
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        while sleep 30; do
+          [ "$$(docker inspect -f '{{.State.Running}}' qbittorrent 2>/dev/null)" = true ] || docker start qbittorrent >/dev/null 2>&1
+        done
+
 volumes:
   tailscale_state:
   caddy_data:
